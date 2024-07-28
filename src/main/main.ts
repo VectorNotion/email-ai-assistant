@@ -135,3 +135,42 @@ app
     });
   })
   .catch(console.log);
+
+ipcMain.on('oauth-google', (event, arg) => {
+  if (arg === 'start') {
+    const authWindow = new BrowserWindow({
+      width: 500,
+      height: 600,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+      },
+    });
+
+    const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=410256670991-igvgpl1onnodrdj9sd7q999aka31v0bj.apps.googleusercontent.com&redirect_uri=https://localhost:54684&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile`;
+
+    authWindow.loadURL(authUrl);
+
+    authWindow.webContents.on('will-navigate', (evt, url) => {
+      const parsedUrl = new URL(url);
+      const code = parsedUrl.searchParams.get('code');
+
+      if (code) {
+        authWindow.close();
+        event.sender.send('oauth-google-reply', code);
+      }
+    });
+
+    authWindow.webContents.on('will-redirect', (details: any, url: string) => {
+      console.log('will-redirect', details, url);
+      const parsedUrl = new URL(url);
+      const code = parsedUrl.searchParams.get('code');
+
+      if (code) {
+        console.log('code', code);
+        authWindow.close();
+        event.sender.send('oauth-google-reply', code);
+      }
+    });
+  }
+});

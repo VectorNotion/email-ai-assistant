@@ -8,13 +8,23 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import dotenv from 'dotenv';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import log from 'electron-log';
+import { autoUpdater } from 'electron-updater';
+import { OAuth2Client } from 'google-auth-library';
+import { google } from 'googleapis';
+import cron from 'node-cron';
+import path from 'path';
+import db from './db';
+import DBHelper from './helpers/db-helpers';
+import GoogleAuth from './helpers/google-auth';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+dotenv.config({
+  path: path.join(__dirname, '../../.env'),
+});
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -136,41 +146,60 @@ app
   })
   .catch(console.log);
 
-ipcMain.on('oauth-google', (event, arg) => {
+ipcMain.on('oauth-google', async (event, arg) => {
   if (arg === 'start') {
-    const authWindow = new BrowserWindow({
-      width: 500,
-      height: 600,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-      },
-    });
-
-    const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=410256670991-igvgpl1onnodrdj9sd7q999aka31v0bj.apps.googleusercontent.com&redirect_uri=https://localhost:54684&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile`;
-
-    authWindow.loadURL(authUrl);
-
-    authWindow.webContents.on('will-navigate', (evt, url) => {
-      const parsedUrl = new URL(url);
-      const code = parsedUrl.searchParams.get('code');
-
-      if (code) {
-        authWindow.close();
-        event.sender.send('oauth-google-reply', code);
-      }
-    });
-
-    authWindow.webContents.on('will-redirect', (details: any, url: string) => {
-      console.log('will-redirect', details, url);
-      const parsedUrl = new URL(url);
-      const code = parsedUrl.searchParams.get('code');
-
-      if (code) {
-        console.log('code', code);
-        authWindow.close();
-        event.sender.send('oauth-google-reply', code);
-      }
-    });
+    try {
+      const token = await GoogleAuth.login();
+      db.userdata.insert({ token, type: 'google-token' });
+      mainWindow?.webContents.send('google-auth', 'success');
+    } catch (e) {
+      mainWindow?.webContents.send('google-auth', 'error');
+    }
   }
 });
+
+DBHelper.bootstrap();
+
+// Define the task you want to run every minute
+const task = async () => {
+  try {
+    console.log('Task is running every minute again and again');
+    // Add your task logic here
+    const tokendata = await new Promise<{
+      token: any;
+    }>((resolve, reject) => {
+      db.userdata.findOne({ type: 'google-token' }, (err, doc) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(doc);
+      });
+    });
+    console.log('Token:', tokendata);
+
+    const oAuth2Client = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECTION_URL,
+    );
+
+    oAuth2Client.setCredentials(tokendata.token);
+
+    console.log('token aquired');
+
+    // list emails received in the last 1 hour
+    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+
+    const res = await gmail.users.messages.list({
+      userId: 'me',
+      q: `newer_than:3h`,
+    });
+
+    console.log('Emails:', res.data);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+// Schedule the task to run every minute
+cron.schedule('* * * * *', task);

@@ -12,14 +12,14 @@ import dotenv from 'dotenv';
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
-import { OAuth2Client } from 'google-auth-library';
-import { google } from 'googleapis';
 import cron from 'node-cron';
 import path from 'path';
 import db from './db';
 import DBHelper from './helpers/db-helpers';
 import GoogleAuth from './helpers/google-auth';
 import MenuBuilder from './menu';
+import EmailFetchingTask from './tasks/EmailFetchingTask';
+import EmailFilteringTask from './tasks/EmailFilteringTask';
 import { resolveHtmlPath } from './util';
 
 dotenv.config({
@@ -160,46 +160,6 @@ ipcMain.on('oauth-google', async (event, arg) => {
 
 DBHelper.bootstrap();
 
-// Define the task you want to run every minute
-const task = async () => {
-  try {
-    console.log('Task is running every minute again and again');
-    // Add your task logic here
-    const tokendata = await new Promise<{
-      token: any;
-    }>((resolve, reject) => {
-      db.userdata.findOne({ type: 'google-token' }, (err, doc) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(doc);
-      });
-    });
-    console.log('Token:', tokendata);
-
-    const oAuth2Client = new OAuth2Client(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECTION_URL,
-    );
-
-    oAuth2Client.setCredentials(tokendata.token);
-
-    console.log('token aquired');
-
-    // list emails received in the last 1 hour
-    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-
-    const res = await gmail.users.messages.list({
-      userId: 'me',
-      q: `newer_than:3h`,
-    });
-
-    console.log('Emails:', res.data);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
-
 // Schedule the task to run every minute
-cron.schedule('* * * * *', task);
+cron.schedule('* * * * *', EmailFetchingTask.processEmails);
+cron.schedule('* * * * *', EmailFilteringTask.filterEmails);

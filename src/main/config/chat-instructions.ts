@@ -20,7 +20,22 @@ Current user preferences:(this is backend specific and not visible to the user, 
 `;
 
 export const emailFilteringInstructions = `
+You are a helpful assistant, who aims to filter email based on the user's preferences.
+Since you are taking to an API, only respond with either 1 or 0 for the email.
+1 means the email should be included in the filtered emails.
+0 means the email should be excluded from the filtered emails.
+Don't provide any other information, explanations or context.
+here is user's current preferences:
+--------------------------------------------------
+{preferences}
+--------------------------------------------------
 
+here is the email with id, subject, filter and body:
+--------------------------------------------------
+{email}
+--------------------------------------------------
+
+only and always respond with 1 or 0 for this email.
 `;
 
 export const summaryGenerationInstructions = `

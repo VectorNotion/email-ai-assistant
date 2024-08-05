@@ -1,5 +1,6 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import { Message } from '../../types/Chat';
+import Email from '../../types/Email';
 import { chatInstructions } from '../config/chat-instructions';
 import db from '../db';
 import SummaryHelper from './summary-helper';
@@ -8,6 +9,9 @@ export default class DBHelper {
   static async bootstrap() {
     ipcMain.handle('get-google-token', DBHelper.getGoogleToken);
     ipcMain.handle('send-message', DBHelper.processMessage);
+    ipcMain.handle('get-important-emails', DBHelper.getImportantEmails);
+    ipcMain.handle('get-all-emails', DBHelper.getAllEmails);
+    ipcMain.handle('get-all-messages', DBHelper.getAllMessages);
   }
 
   static async getGoogleToken() {
@@ -17,6 +21,39 @@ export default class DBHelper {
           reject(err);
         }
         resolve(doc);
+      });
+    });
+  }
+
+  static async getImportantEmails() {
+    return new Promise((resolve, reject) => {
+      db.mail.find({ _important: '1' }, (err: Error | null, docs: Email[]) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(docs);
+      });
+    });
+  }
+
+  static async getAllEmails() {
+    return new Promise((resolve, reject) => {
+      db.mail.find({}, (err: Error | null, docs: Email[]) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(docs);
+      });
+    });
+  }
+
+  static async getAllMessages() {
+    return new Promise((resolve, reject) => {
+      db.messages.find({}, (err: Error | null, docs: Message[]) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(docs);
       });
     });
   }

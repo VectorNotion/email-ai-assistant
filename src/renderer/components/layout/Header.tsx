@@ -5,6 +5,7 @@ import {
   ButtonGroup,
   IconButton,
   Stack,
+  useColorMode,
 } from '@chakra-ui/react';
 import {
   AutomaticModeIcon,
@@ -15,6 +16,8 @@ import {
 } from '../../icon/Icons';
 
 export default function Header() {
+  const { setColorMode, colorMode } = useColorMode();
+
   return (
     <Box
       position="fixed"
@@ -50,19 +53,29 @@ export default function Header() {
           <IconButton
             aria-label="Light Mode"
             size="sm"
-            colorScheme="brand"
+            colorScheme={colorMode === 'light' ? 'brand' : 'gray'}
             variant="solid"
             icon={<LightModeIcon boxSize={4} />}
+            onClick={() => {
+              setColorMode('light');
+            }}
           />
           <IconButton
             aria-label="Dark Mode"
             size="sm"
             icon={<DarkModeIcon boxSize={3} />}
+            colorScheme={colorMode === 'dark' ? 'brand' : 'gray'}
+            onClick={() => {
+              setColorMode('dark');
+            }}
           />
           <IconButton
             aria-label="Dark Mode"
             size="sm"
             icon={<AutomaticModeIcon boxSize={3} />}
+            onClick={() => {
+              setColorMode('system');
+            }}
           />
         </ButtonGroup>
       </Box>

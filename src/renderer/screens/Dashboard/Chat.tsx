@@ -6,6 +6,7 @@ import {
   IconButton,
   Text,
   Textarea,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import Markdown from 'markdown-to-jsx';
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
@@ -15,6 +16,11 @@ import { SendIcon } from '../../icon/Icons';
 export default function Chats() {
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const value = useColorModeValue(
+    'gray.600', // light mode
+    'gray.300', // dark mode
+  );
   const [messages, setMessages] = useState<Message[]>([
     {
       content: 'I am your EmailAIAssistant, how can I help you today?',
@@ -24,6 +30,15 @@ export default function Chats() {
     },
   ]);
   const messagesRef = useRef<Message[]>(messages);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const previousMessages =
+        await window.electron.ipcRenderer.invoke('get-all-messages');
+      setMessages(previousMessages);
+    };
+    fetchMessages();
+  }, []);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -83,6 +98,13 @@ export default function Chats() {
     };
   }, []);
 
+  useEffect(() => {
+    messagesRef.current = messages;
+    if (boxRef.current) {
+      boxRef.current.scrollTop = boxRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -92,7 +114,7 @@ export default function Chats() {
 
   return (
     <>
-      <Box w="100%" color="gray.600" flexGrow={1} overflowY="scroll">
+      <Box ref={boxRef} w="100%" color={value} flexGrow={1} overflowY="scroll">
         {messages.map((msg) => (
           <Box key={msg.id}>
             <Box w="100%" m={4} p={4}>

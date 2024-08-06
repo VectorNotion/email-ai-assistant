@@ -1,4 +1,5 @@
 import { Message } from '../../types/Chat';
+import Config from '../config';
 import { summaryGenerationInstructions } from '../config/chat-instructions';
 import db from '../db';
 
@@ -45,7 +46,7 @@ export default class SummaryHelper {
       }),
     ]);
 
-    const inferenceURL = process.env.OLLAMA_INFERENCE_URL || '';
+    const inferenceURL = Config.OLLAMA_INFERENCE_URL || '';
 
     const summaryMessage = summaryGenerationInstructions
       .replace('{summary}', summary.summary)

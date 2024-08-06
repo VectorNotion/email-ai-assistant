@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import Config from './config';
 
 const electronHandler = {
   ipcRenderer: {
@@ -25,5 +26,13 @@ const electronHandler = {
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
+
+const env = {
+  ollama_model_list_url: Config.OLLAMA_MODEL_LIST_URL,
+};
+
+export type Env = typeof env;
+
+contextBridge.exposeInMainWorld('env', env);
 
 export type ElectronHandler = typeof electronHandler;

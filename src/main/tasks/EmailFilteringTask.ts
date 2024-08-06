@@ -1,10 +1,12 @@
-import { Notification } from 'electron';
+import { Notification, WebContents } from 'electron';
 import Email from '../../types/Email';
 import db from '../db';
 import OllaamaAPI from '../helpers/OllamaAPI';
 
 export default class EmailFilteringTask {
-  static async filterEmails(): Promise<void> {
+  static async filterEmails(
+    webContents: WebContents | undefined,
+  ): Promise<void> {
     const emails = await new Promise<Email[]>((resolve, reject) => {
       db.mail.find(
         {
@@ -56,6 +58,7 @@ export default class EmailFilteringTask {
             resolve();
           },
         );
+        webContents?.send('email-filtered');
       });
       if (filterResult) {
         new Notification({
@@ -65,8 +68,4 @@ export default class EmailFilteringTask {
       }
     });
   }
-}
-
-if (require.main === module) {
-  EmailFilteringTask.filterEmails();
 }

@@ -8,7 +8,6 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import dotenv from 'dotenv';
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
@@ -22,9 +21,6 @@ import EmailFetchingTask from './tasks/EmailFetchingTask';
 import EmailFilteringTask from './tasks/EmailFilteringTask';
 import { resolveHtmlPath } from './util';
 
-dotenv.config({
-  path: path.join(__dirname, '../../.env'),
-});
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -155,5 +151,9 @@ ipcMain.on('oauth-google', async (event, arg) => {
 DBHelper.bootstrap();
 
 // Schedule the task to run every minute
-cron.schedule('* * * * *', EmailFetchingTask.processEmails);
-cron.schedule('* * * * *', EmailFilteringTask.filterEmails);
+cron.schedule('* * * * *', () => {
+  EmailFetchingTask.processEmails(mainWindow?.webContents);
+});
+cron.schedule('* * * * *', () => {
+  EmailFilteringTask.filterEmails(mainWindow?.webContents);
+});

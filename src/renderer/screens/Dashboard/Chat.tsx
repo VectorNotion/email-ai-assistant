@@ -16,8 +16,14 @@ import { SendIcon } from '../../icon/Icons';
 export default function Chats() {
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [streaming, setStreaming] = useState<boolean>(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const value = useColorModeValue(
+    'gray.600', // light mode
+    'gray.300', // dark mode
+  );
+
+  const textAreaColor = useColorModeValue(
     'gray.600', // light mode
     'gray.300', // dark mode
   );
@@ -65,6 +71,7 @@ export default function Chats() {
   const handleInferenceUpdate = (chunk: any) => {
     const chunkJSON = JSON.parse(chunk);
     if (!chunkJSON.done) {
+      setStreaming(true);
       // check if the last message is from the assistant
       const lastMessage = messagesRef.current[messagesRef.current.length - 1];
       if (lastMessage.role === 'assistant') {
@@ -81,6 +88,7 @@ export default function Chats() {
       }
     } else {
       setLoading(false);
+      setStreaming(false);
     }
   };
 
@@ -126,6 +134,14 @@ export default function Chats() {
             {messages.indexOf(msg) !== messages.length - 1 && <Divider />}
           </Box>
         ))}
+        {!streaming && loading && (
+          <Box w="100%" m={4} p={4}>
+            <Text fontSize="xs" textTransform="capitalize">
+              Assistant
+            </Text>
+            <Text>Processing...</Text>
+          </Box>
+        )}
       </Box>
       <Flex
         as="form"
@@ -141,7 +157,7 @@ export default function Chats() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            color={message === '' ? 'gray.400' : 'black'}
+            color={textAreaColor}
           />
         </FormControl>
         <IconButton

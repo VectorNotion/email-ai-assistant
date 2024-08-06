@@ -7,6 +7,7 @@ import {
   Stack,
   useColorMode,
 } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 import {
   AutomaticModeIcon,
   DarkModeIcon,
@@ -14,6 +15,51 @@ import {
   LightModeIcon,
   OllamaIcon,
 } from '../../icon/Icons';
+
+function OllamaStatus() {
+  const [status, setStatus] = useState<'online' | 'offline'>('online');
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const resp = await fetch(window.env.ollama_model_list_url);
+
+        if (!resp.ok) {
+          setStatus('offline');
+        }
+
+        const data = await resp.json();
+        if (
+          data.models.length > 0 &&
+          data.models[0].name.startsWith('llama3')
+        ) {
+          setStatus('online');
+        } else {
+          setStatus('offline');
+        }
+      } catch (e) {
+        setStatus('offline');
+      }
+    }, 5000);
+
+    return () => clearInterval(interval as any);
+  });
+  return (
+    <Stack direction="row" spacing={4}>
+      <Avatar
+        bg="gray.50"
+        icon={<OllamaIcon boxSize={8} />}
+        size="sm"
+        color="gray.900"
+      >
+        <AvatarBadge
+          boxSize="1.25em"
+          bg={status === 'online' ? 'green.500' : 'red.500'}
+        />
+      </Avatar>
+    </Stack>
+  );
+}
 
 export default function Header() {
   const { setColorMode, colorMode } = useColorMode();
@@ -30,16 +76,7 @@ export default function Header() {
       alignItems="center"
     >
       <Box display="flex" alignItems="center" gap="4">
-        <Stack direction="row" spacing={4}>
-          <Avatar
-            bg="gray.50"
-            icon={<OllamaIcon boxSize={8} />}
-            size="sm"
-            color="gray.900"
-          >
-            <AvatarBadge boxSize="1.25em" bg="green.500" />
-          </Avatar>
-        </Stack>
+        <OllamaStatus />
 
         <IconButton
           aria-label="Ollama"

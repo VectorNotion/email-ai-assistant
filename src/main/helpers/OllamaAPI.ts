@@ -1,4 +1,5 @@
 import Email from '../../types/Email';
+import Config from '../config';
 import { emailFilteringInstructions } from '../config/chat-instructions';
 import SummaryHelper from './summary-helper';
 
@@ -15,7 +16,7 @@ export default class OllaamaAPI {
         Body: ${email.body}`,
       );
 
-    const response = await fetch(process.env.OLLAMA_INFERENCE_URL || '', {
+    const response = await fetch(Config.OLLAMA_INFERENCE_URL || '', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

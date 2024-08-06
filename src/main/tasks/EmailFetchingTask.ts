@@ -1,11 +1,15 @@
+import { WebContents } from 'electron';
 import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { convert } from 'html-to-text';
 import { Base64 } from 'js-base64';
+import Config from '../config';
 import db from '../db';
 
 export default class EmailFetchingTask {
-  static async processEmails(): Promise<void> {
+  static async processEmails(
+    webContents: WebContents | undefined,
+  ): Promise<void> {
     const tokendata = await new Promise<{
       token: any;
     }>((resolve, reject) => {
@@ -25,9 +29,9 @@ export default class EmailFetchingTask {
     }
 
     const oAuth2Client = new OAuth2Client(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECTION_URL,
+      Config.GOOGLE_CLIENT_ID,
+      Config.GOOGLE_CLIENT_SECRET,
+      Config.GOOGLE_REDIRECTION_URL,
     );
 
     oAuth2Client.setCredentials(tokendata.token);
@@ -112,12 +116,10 @@ export default class EmailFetchingTask {
               resolve();
             },
           );
+
+          webContents?.send('email-fetched');
         });
       }
     });
   }
-}
-
-if (require.main === module) {
-  EmailFetchingTask.processEmails();
 }

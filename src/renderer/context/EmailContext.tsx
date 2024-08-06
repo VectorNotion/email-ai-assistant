@@ -22,17 +22,30 @@ export default function EmailContextProvider({
 }) {
   const [emails, setEmails] = useState<Email[]>([]);
   const [importantEmails, setImportantEmails] = useState<Email[]>([]);
+  const fetchEmails = async () => {
+    const [allEmails, allImportantEmails] = await Promise.all([
+      window.electron.ipcRenderer.invoke('get-all-emails'),
+      window.electron.ipcRenderer.invoke('get-important-emails'),
+    ]);
+    setEmails(allEmails);
+    setImportantEmails(allImportantEmails);
+  };
+  useEffect(() => {
+    fetchEmails();
+  }, []);
 
   useEffect(() => {
-    const fetchEmails = async () => {
-      const [allEmails, allImportantEmails] = await Promise.all([
-        window.electron.ipcRenderer.invoke('get-all-emails'),
-        window.electron.ipcRenderer.invoke('get-important-emails'),
-      ]);
-      setEmails(allEmails);
-      setImportantEmails(allImportantEmails);
+    window.electron.ipcRenderer.on('email-fetched', fetchEmails);
+    return () => {
+      window.electron.ipcRenderer.removeListener('email-fetched', fetchEmails);
     };
-    fetchEmails();
+  }, []);
+
+  useEffect(() => {
+    window.electron.ipcRenderer.on('email-filtered', fetchEmails);
+    return () => {
+      window.electron.ipcRenderer.removeListener('email-filtered', fetchEmails);
+    };
   }, []);
 
   return useMemo(

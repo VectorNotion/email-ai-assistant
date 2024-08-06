@@ -1,6 +1,7 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import { Message } from '../../types/Chat';
 import Email from '../../types/Email';
+import Config from '../config';
 import { chatInstructions } from '../config/chat-instructions';
 import db from '../db';
 import SummaryHelper from './summary-helper';
@@ -49,12 +50,15 @@ export default class DBHelper {
 
   static async getAllMessages() {
     return new Promise((resolve, reject) => {
-      db.messages.find({}, (err: Error | null, docs: Message[]) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(docs);
-      });
+      db.messages
+        .find({})
+        .sort({ timestamp: '-1' })
+        .exec((err: Error | null, docs: Message[]) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(docs);
+        });
     });
   }
 
@@ -82,7 +86,7 @@ export default class DBHelper {
     message.timestamp = new Date().getTime();
     docs.push(message);
 
-    const inferenceURL = process.env.OLLAMA_INFERENCE_URL || '';
+    const inferenceURL = Config.OLLAMA_INFERENCE_URL || '';
 
     const response = await fetch(inferenceURL, {
       method: 'POST',

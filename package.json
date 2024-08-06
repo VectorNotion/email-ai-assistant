@@ -188,14 +188,15 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "EmailAIAssistant",
+    "appId": "org.erb.VectorNotion",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
       "dist",
       "node_modules",
-      "package.json"
+      "package.json",
+      ".env"
     ],
     "mac": {
       "sign": ".erb/scripts/notarize.js",

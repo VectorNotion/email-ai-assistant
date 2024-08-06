@@ -1,4 +1,11 @@
-import { Box, Button, Image, Text, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Image,
+  Text,
+  useColorModeValue,
+  useToast,
+} from '@chakra-ui/react';
 import { Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import icon from '../../../assets/icon.svg';
@@ -10,6 +17,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true); // Initial state is true to show loading
   const navigate = useNavigate();
   const toast = useToast();
+
+  const value = useColorModeValue(
+    'linear(to-b, #e9e8f5, #ffffff)',
+    'linear(to-b, #171923, #262626)',
+  );
 
   useEffect(() => {
     const getGoogleToken = async () => {
@@ -58,7 +70,7 @@ export default function Home() {
         <Box
           w="100%"
           h="100dvh"
-          bgGradient="linear(to-b, #e9e8f5, #ffffff)"
+          bgGradient={value}
           color="white"
           p={4}
           display="flex"

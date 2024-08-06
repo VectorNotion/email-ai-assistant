@@ -21,12 +21,10 @@ export default class GoogleAuth {
       authWindow.webContents.on(
         'will-redirect',
         async (details: any, url: string) => {
-          console.log('will-redirect', details, url);
           const parsedUrl = new URL(url);
           const code = parsedUrl.searchParams.get('code');
 
           if (code) {
-            console.log('code', code);
             try {
               const tokenUrl = 'https://oauth2.googleapis.com/token';
               const tokenData = queryString.stringify({
@@ -42,10 +40,8 @@ export default class GoogleAuth {
                   'Content-Type': 'application/x-www-form-urlencoded',
                 },
               });
-              console.log('Token:', tokenResponse.data);
               resolve(tokenResponse.data);
             } catch (error) {
-              console.error('Error:', error);
               reject(error);
             }
             authWindow.close();

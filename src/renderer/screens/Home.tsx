@@ -13,10 +13,8 @@ export default function Home() {
 
   useEffect(() => {
     const getGoogleToken = async () => {
-      console.log('Getting Google Token');
       const token =
         await window.electron.ipcRenderer.invoke('get-google-token');
-      console.log('token', token);
       if (token) {
         // Token is received, navigate to dashboard
         navigate('/dashboard');

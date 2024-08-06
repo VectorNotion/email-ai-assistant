@@ -45,7 +45,6 @@ export default function Chats() {
   }, [messages]);
 
   const sendMessage = async () => {
-    console.log('Submitting message');
     if (message === '' || loading) {
       return;
     }
@@ -60,7 +59,6 @@ export default function Chats() {
     window.electron.ipcRenderer.invoke('send-message', newMessage);
 
     setMessages([...messagesRef.current, newMessage]);
-    console.log('sending message', message);
     setMessage('');
   };
 

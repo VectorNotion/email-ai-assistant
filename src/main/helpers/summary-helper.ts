@@ -30,7 +30,6 @@ export default class SummaryHelper {
   }
 
   static async generateSummary() {
-    console.log('Generating summary');
     const [summary, messages]: [Summary, Message[]] = await Promise.all([
       SummaryHelper.getCurrentSummary(),
       new Promise<Message[]>((resolve, reject) => {
@@ -46,9 +45,6 @@ export default class SummaryHelper {
       }),
     ]);
 
-    console.log('Summary:', summary);
-    console.log('Messages:', messages);
-
     const inferenceURL = process.env.OLLAMA_INFERENCE_URL || '';
 
     const summaryMessage = summaryGenerationInstructions
@@ -57,8 +53,6 @@ export default class SummaryHelper {
         '{messages}',
         messages.map((msg) => `${msg.role}-${msg.content}`).join('\n\n\n'),
       );
-
-    console.log('Summary message:', summaryMessage);
 
     const response = await fetch(inferenceURL, {
       method: 'POST',
@@ -88,14 +82,9 @@ export default class SummaryHelper {
       };
     }
 
-    console.log('Inference response:', response);
-
     const responseData = await response.json();
-    console.log('Inference response:', responseData);
 
     const newSummary = responseData.message.content;
-
-    console.log('Generated summary:', newSummary);
 
     // insert if not exists else update
 

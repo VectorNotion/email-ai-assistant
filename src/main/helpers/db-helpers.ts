@@ -13,6 +13,7 @@ export default class DBHelper {
     ipcMain.handle('get-important-emails', DBHelper.getImportantEmails);
     ipcMain.handle('get-all-emails', DBHelper.getAllEmails);
     ipcMain.handle('get-all-messages', DBHelper.getAllMessages);
+    ipcMain.handle('logout', DBHelper.logout);
   }
 
   static async getGoogleToken() {
@@ -24,6 +25,38 @@ export default class DBHelper {
         resolve(doc);
       });
     });
+  }
+
+  static async logout() {
+    // delete the google token from the database
+    // delete all the messages from the database
+    // delete all the emails from the database
+    return Promise.all([
+      new Promise<void>((resolve, reject) => {
+        db.userdata.remove({ type: 'google-token' }, {}, (err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve();
+        });
+      }),
+      new Promise<void>((resolve, reject) => {
+        db.messages.remove({}, { multi: true }, (err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve();
+        });
+      }),
+      new Promise<void>((resolve, reject) => {
+        db.mail.remove({}, { multi: true }, (err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve();
+        });
+      }),
+    ]);
   }
 
   static async getImportantEmails() {

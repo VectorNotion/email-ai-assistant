@@ -151,9 +151,7 @@ ipcMain.on('oauth-google', async (event, arg) => {
 DBHelper.bootstrap();
 
 // Schedule the task to run every minute
-cron.schedule('* * * * *', () => {
-  EmailFetchingTask.processEmails(mainWindow?.webContents);
-});
-cron.schedule('* * * * *', () => {
-  EmailFilteringTask.filterEmails(mainWindow?.webContents);
+cron.schedule('* * * * *', async () => {
+  await EmailFetchingTask.processEmails(mainWindow?.webContents);
+  await EmailFilteringTask.filterEmails(mainWindow?.webContents);
 });

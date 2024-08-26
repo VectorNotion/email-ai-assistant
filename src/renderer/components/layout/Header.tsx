@@ -8,11 +8,13 @@ import {
   useColorMode,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AutomaticModeIcon,
   DarkModeIcon,
   GithubIcon,
   LightModeIcon,
+  LogoutIcon,
   OllamaIcon,
 } from '../../icon/Icons';
 
@@ -63,7 +65,22 @@ function OllamaStatus() {
 
 export default function Header() {
   const { setColorMode, colorMode } = useColorMode();
-
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    const getGoogleToken = async () => {
+      const token =
+        await window.electron.ipcRenderer.invoke('get-google-token');
+      if (token) {
+        // Token is received, navigate to dashboard
+        setIsLoggedIn(true);
+      } else {
+        // Token not found, update loading state
+        setIsLoggedIn(false);
+      }
+    };
+    getGoogleToken();
+  }, [navigate]);
   return (
     <Box
       position="fixed"
@@ -75,17 +92,7 @@ export default function Header() {
       gap={4}
       alignItems="center"
     >
-      <Box display="flex" alignItems="center" gap="4">
-        <OllamaStatus />
-
-        <IconButton
-          aria-label="Ollama"
-          size="lg"
-          borderRadius="full"
-          icon={<GithubIcon boxSize={8} />}
-        />
-      </Box>
-      <Box ml={16}>
+      <Box mr={16}>
         <ButtonGroup size="sm" isAttached variant="solid">
           <IconButton
             aria-label="Light Mode"
@@ -115,6 +122,29 @@ export default function Header() {
             }}
           />
         </ButtonGroup>
+      </Box>
+
+      <Box display="flex" alignItems="center" gap="4">
+        <OllamaStatus />
+
+        <IconButton
+          aria-label="Ollama"
+          size="lg"
+          borderRadius="full"
+          icon={<GithubIcon boxSize={8} />}
+        />
+        {isLoggedIn && (
+          <IconButton
+            aria-label="Ollama"
+            size="lg"
+            borderRadius="full"
+            icon={<LogoutIcon boxSize={6} />}
+            onClick={async () => {
+              await window.electron.ipcRenderer.invoke('logout');
+              navigate('/');
+            }}
+          />
+        )}
       </Box>
     </Box>
   );

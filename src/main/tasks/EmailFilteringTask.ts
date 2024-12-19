@@ -47,7 +47,7 @@ export default class EmailFilteringTask {
             $set: {
               _processed: true,
               _processing: false,
-              _important: filterResult,
+              _important: filterResult ? '1' : '0',
             },
           },
           {},

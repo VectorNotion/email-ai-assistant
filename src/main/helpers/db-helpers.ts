@@ -73,12 +73,15 @@ export default class DBHelper {
 
   static async getAllEmails() {
     return new Promise((resolve, reject) => {
-      db.mail.find({}, (err: Error | null, docs: Email[]) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(docs);
-      });
+      db.mail
+        .find({})
+        .sort({ time: -1 })
+        .exec((err: Error | null, docs: Email[]) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(docs);
+        });
     });
   }
 

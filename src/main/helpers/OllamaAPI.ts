@@ -43,6 +43,7 @@ export default class OllaamaAPI {
     }
 
     if (!response.body) {
+      console.error('No response body');
       return false;
     }
 

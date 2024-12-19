@@ -11,7 +11,6 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
-import cron from 'node-cron';
 import path from 'path';
 import db from './db';
 import DBHelper from './helpers/db-helpers';
@@ -158,8 +157,8 @@ ipcMain.on('oauth-google', async (event, arg) => {
 
 DBHelper.bootstrap();
 
-// Schedule the task to run every minute
-cron.schedule('* * * * *', async () => {
+// Schedule the task to run every 10 seconds
+setInterval(async () => {
   await EmailFetchingTask.processEmails(mainWindow?.webContents);
   await EmailFilteringTask.filterEmails(mainWindow?.webContents);
-});
+}, 10 * 1000);

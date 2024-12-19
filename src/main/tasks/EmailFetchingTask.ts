@@ -10,6 +10,7 @@ export default class EmailFetchingTask {
   static async processEmails(
     webContents: WebContents | undefined,
   ): Promise<void> {
+    console.log('Processing emails');
     const tokendata = await new Promise<{
       token: any;
     }>((resolve, reject) => {
@@ -48,6 +49,11 @@ export default class EmailFetchingTask {
     }
 
     res.data.messages.forEach(async (email: any) => {
+      const emailDataT = await gmail.users.messages.get({
+        userId: 'me',
+        id: email.id || '',
+      });
+      console.log(emailDataT.data.internalDate);
       const emailExists = await new Promise<boolean>((resolve, reject) => {
         db.mail.findOne({ id: email.id }, (err, doc) => {
           if (err) {
@@ -111,6 +117,7 @@ export default class EmailFetchingTask {
               _processed: false,
               from,
               _processing: false,
+              time: emailData.data.internalDate,
             },
             (err) => {
               if (err) {

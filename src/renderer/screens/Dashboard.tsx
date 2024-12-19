@@ -3,10 +3,14 @@ import {
   Box,
   Button,
   Flex,
+  IconButton,
   Image,
+  Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { RiCloseFill } from 'react-icons/ri';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+
 import icon from '../../../assets/magic-icon.svg';
 import Header from '../components/layout/Header';
 import EmailContextProvider, { useEmailContext } from '../context/EmailContext';
@@ -84,14 +88,74 @@ function ImportantEmailsButton() {
   );
 }
 
-export default function Home() {
+function DashboardNavigation() {
   const { pathname } = useLocation();
   const borderValue = useColorModeValue('gray.800', 'gray.300');
+  const buttonColor = useColorModeValue('blackAlpha', 'whiteAlpha');
+  const { activeEmail } = useEmailContext();
+  const navigate = useNavigate();
+
+  return (
+    <Box w="100%" py={4} display="flex">
+      {activeEmail ? (
+        <Flex alignItems="center" gap={4}>
+          <IconButton
+            onClick={() => navigate(-1)}
+            size="lg"
+            icon={<RiCloseFill size="36" />}
+            aria-label="Close"
+            borderRadius="full"
+          />
+          <Text color="gray.600" fontWeight="bold">
+            {activeEmail.subject}
+          </Text>
+        </Flex>
+      ) : (
+        <>
+          <Box
+            borderBottom={pathname.match(/\/dashboard\/?$/) ? '2px' : 0}
+            borderColor={borderValue}
+          >
+            <Link to="/dashboard/">
+              <ImportantEmailsButton />
+            </Link>
+          </Box>
+          <Box
+            borderBottom={pathname === '/dashboard/all-emails' ? '2px' : 0}
+            borderColor={borderValue}
+          >
+            <Link to="/dashboard/all-emails">
+              <AllEmailsButton />
+            </Link>
+          </Box>
+          <Box
+            borderBottom={pathname === '/dashboard/chat' ? '2px' : 0}
+            borderColor={borderValue}
+          >
+            <Link to="/dashboard/chat">
+              <Button
+                leftIcon={<ChatIcon />}
+                colorScheme={
+                  pathname === '/dashboard/chat' ? 'gray' : buttonColor
+                }
+                variant="ghost"
+                size="lg"
+              >
+                Assistant
+              </Button>
+            </Link>
+          </Box>
+        </>
+      )}
+    </Box>
+  );
+}
+
+export default function Home() {
   const value = useColorModeValue(
     'linear(to-b, #e9e8f5, #ffffff)',
     'linear(to-b, #171923, #262626)',
   );
-  const buttonColor = useColorModeValue('blackAlpha', 'whiteAlpha');
 
   return (
     <Box>
@@ -109,41 +173,7 @@ export default function Home() {
           flexDirection="column"
           gap={4}
         >
-          <Box w="100%" py={4} display="flex">
-            <Box
-              borderBottom={pathname.match(/\/dashboard\/?$/) ? '2px' : 0}
-              borderColor={borderValue}
-            >
-              <Link to="/dashboard/">
-                <ImportantEmailsButton />
-              </Link>
-            </Box>
-            <Box
-              borderBottom={pathname === '/dashboard/all-emails' ? '2px' : 0}
-              borderColor={borderValue}
-            >
-              <Link to="/dashboard/all-emails">
-                <AllEmailsButton />
-              </Link>
-            </Box>
-            <Box
-              borderBottom={pathname === '/dashboard/chat' ? '2px' : 0}
-              borderColor={borderValue}
-            >
-              <Link to="/dashboard/chat">
-                <Button
-                  leftIcon={<ChatIcon />}
-                  colorScheme={
-                    pathname === '/dashboard/chat' ? 'gray' : buttonColor
-                  }
-                  variant="ghost"
-                  size="lg"
-                >
-                  Assistant
-                </Button>
-              </Link>
-            </Box>
-          </Box>
+          <DashboardNavigation />
           <Box
             flexGrow={1}
             display="flex"

@@ -11,6 +11,8 @@ import {
 interface EmailContextType {
   emails: Email[];
   importantEmails: Email[];
+  activeEmail: Email | null;
+  setActiveEmail: (email: Email | null) => void;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ export default function EmailContextProvider({
   children: ReactNode;
 }) {
   const [emails, setEmails] = useState<Email[]>([]);
+  const [activeEmail, setActiveEmail] = useState<Email | null>(null);
   const [importantEmails, setImportantEmails] = useState<Email[]>([]);
   const fetchEmails = async () => {
     const [allEmails, allImportantEmails] = await Promise.all([
@@ -50,11 +53,13 @@ export default function EmailContextProvider({
 
   return useMemo(
     () => (
-      <EmailContext.Provider value={{ emails, importantEmails }}>
+      <EmailContext.Provider
+        value={{ emails, importantEmails, activeEmail, setActiveEmail }}
+      >
         {children}
       </EmailContext.Provider>
     ),
-    [emails, importantEmails, children],
+    [emails, importantEmails, children, activeEmail],
   );
 }
 

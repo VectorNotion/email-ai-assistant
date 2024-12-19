@@ -8,6 +8,7 @@ import {
   StackDivider,
   Text,
 } from '@chakra-ui/react';
+import { NavLink } from 'react-router-dom';
 
 export default function EmailListing({ emails }: { emails: Email[] }) {
   return (
@@ -15,14 +16,16 @@ export default function EmailListing({ emails }: { emails: Email[] }) {
       <CardBody>
         <Stack divider={<StackDivider />} spacing="4">
           {emails.map((email) => (
-            <Box key={email.id}>
-              <Heading size="xs" textTransform="uppercase">
-                {email.subject}
-              </Heading>
-              <Text pt="2" fontSize="sm">
-                {email.from}
-              </Text>
-            </Box>
+            <NavLink to={`/dashboard/emails/${email.id}`} key={email.id}>
+              <Box key={email.id}>
+                <Heading size="xs" textTransform="uppercase">
+                  {email.subject}
+                </Heading>
+                <Text pt="2" fontSize="sm">
+                  {email.from}
+                </Text>
+              </Box>
+            </NavLink>
           ))}
         </Stack>
       </CardBody>

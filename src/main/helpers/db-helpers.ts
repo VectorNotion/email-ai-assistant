@@ -12,6 +12,7 @@ export default class DBHelper {
     ipcMain.handle('send-message', DBHelper.processMessage);
     ipcMain.handle('get-important-emails', DBHelper.getImportantEmails);
     ipcMain.handle('get-all-emails', DBHelper.getAllEmails);
+    ipcMain.handle('get-email', DBHelper.getEmail);
     ipcMain.handle('get-all-messages', DBHelper.getAllMessages);
     ipcMain.handle('logout', DBHelper.logout);
   }
@@ -77,6 +78,17 @@ export default class DBHelper {
           reject(err);
         }
         resolve(docs);
+      });
+    });
+  }
+
+  static async getEmail(event: IpcMainInvokeEvent, id: string) {
+    return new Promise((resolve, reject) => {
+      db.mail.findOne({ id }, (err: Error | null, doc: Email) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(doc);
       });
     });
   }

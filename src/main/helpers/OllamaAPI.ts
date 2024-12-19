@@ -47,8 +47,8 @@ export default class OllaamaAPI {
     }
 
     const responseData = await response.json();
-    const filteredEmails = responseData.message.content;
+    const filterResult = responseData.message.content;
 
-    return filteredEmails;
+    return filterResult;
   }
 }

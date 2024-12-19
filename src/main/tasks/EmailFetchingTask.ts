@@ -89,6 +89,8 @@ export default class EmailFetchingTask {
           body = Base64.decode(emailData.data.payload.body.data);
         }
 
+        const rawBody = body;
+
         body = convert(body, {
           selectors: [
             { selector: 'a', format: 'skip' },
@@ -105,6 +107,7 @@ export default class EmailFetchingTask {
               id: email.id,
               subject,
               body,
+              rawBody,
               _processed: false,
               from,
               _processing: false,

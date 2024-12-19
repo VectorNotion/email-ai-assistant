@@ -1,11 +1,12 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { ChakraProvider } from '@chakra-ui/react';
-import Home from './screens/Home';
+import { Route, MemoryRouter as Router, Routes } from 'react-router-dom';
+import EmailDetails from './components/EmailDetails';
 import Dashboard from './screens/Dashboard';
-import theme from './theme';
-import Important from './screens/Dashboard/Important';
-import Emails from './screens/Dashboard/Emails';
 import Chats from './screens/Dashboard/Chat';
+import Emails from './screens/Dashboard/Emails';
+import Important from './screens/Dashboard/Important';
+import Home from './screens/Home';
+import theme from './theme';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
             <Route index element={<Important />} />
             <Route path="all-emails" element={<Emails />} />
             <Route path="chat" element={<Chats />} />
+            <Route path="emails/:id" element={<EmailDetails />} />
           </Route>
         </Routes>
       </Router>

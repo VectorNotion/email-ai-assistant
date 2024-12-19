@@ -120,7 +120,14 @@ export default function Chats() {
 
   return (
     <>
-      <Box ref={boxRef} w="100%" color={value} flexGrow={1} overflowY="scroll">
+      <Box
+        ref={boxRef}
+        w="100%"
+        color={value}
+        flexGrow={1}
+        overflowY="scroll"
+        overflowX="hidden"
+      >
         {messages.map((msg) => (
           <Box key={msg.id}>
             <Box w="100%" m={4} p={4}>
